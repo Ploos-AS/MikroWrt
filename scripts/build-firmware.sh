@@ -31,3 +31,4 @@ printf '%s\n' "Build completed; images are NOT qualified for flashing."
 find "$OPENWRT_DIR/bin/targets" -type f \( -name '*.bin' -o -name '*.img' \) -exec sha256sum {} \; > build-output/image-sha256.txt
 python3 scripts/report-images.py "$OPENWRT_DIR/bin/targets" --output build-output/images.json
 python3 scripts/report-packages.py "$OPENWRT_DIR/.config" --output build-output/packages.json
+printf '%s\\n' "Build artifacts found; images remain UNTESTED — DO NOT FLASH."\n
