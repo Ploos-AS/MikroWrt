@@ -24,6 +24,13 @@ jobs:
           ./scripts/feeds install -a
       - name: Select Mango target
         run: sh scripts/select-mango.sh
+      - name: Resolve target and inspect selected packages
+        run: |
+          cd upstream/openwrt
+          make defconfig
+          cd ../..
+          python3 scripts/report-packages.py upstream/openwrt/.config --output build-output/packages-prebuild.json
+          python3 scripts/check-usability.py upstream/openwrt/.config --require-ssh --output build-output/usability-prebuild.json
       - name: Build candidate (no flashing)
         env:
           BUILD_JOBS: "2"
