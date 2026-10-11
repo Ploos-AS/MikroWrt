@@ -22,13 +22,13 @@ case "$MIKROWRT_REQUIRE_SSH" in
   1) python3 scripts/check-usability.py "$OPENWRT_DIR/.config" --require-ssh --output build-output/usability.json ;;
   *) echo "MIKROWRT_REQUIRE_SSH must be 0 or 1" >&2; exit 2 ;;
 esac
+python3 scripts/report-packages.py "$OPENWRT_DIR/.config" --output build-output/packages.json
 (
   cd "$OPENWRT_DIR"
   make download -j"$BUILD_JOBS"
   make -j"$BUILD_JOBS" V=s
 )
-printf '%s\n' "Build completed; images are NOT qualified for flashing."
-find "$OPENWRT_DIR/bin/targets" -type f \( -name '*.bin' -o -name '*.img' \) -exec sha256sum {} \; > build-output/image-sha256.txt
-python3 scripts/report-images.py "$OPENWRT_DIR/bin/targets" --output build-output/images.json
-python3 scripts/report-packages.py "$OPENWRT_DIR/.config" --output build-output/packages.json
-printf '%s\\n' "Build artifacts found; images remain UNTESTED — DO NOT FLASH."\n
+printf '%s\n' "Compilation finished; checking firmware artifacts."
+python3 scripts/report-images.py "$OPENWRT_DIR/bin/targets" --require-images --output build-output/images.json
+find "$OPENWRT_DIR/bin/targets" -type f \( -name '*.bin' -o -name '*.img' -o -name '*.trx' -o -name '*.itb' \) -exec sha256sum {} \; > build-output/image-sha256.txt
+printf '%s\n' "Build artifacts found; images remain UNTESTED - DO NOT FLASH."
