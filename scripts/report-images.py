@@ -11,7 +11,11 @@ def report(folder: Path, limit: int | None):
         if not path.is_file() or path.suffix.lower() not in {".bin", ".img", ".trx", ".itb"}:
             continue
         size = path.stat().st_size
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest_obj = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest_obj.update(chunk)
+        digest = digest_obj.hexdigest()
         records.append({
             "path": str(path.relative_to(folder)),
             "bytes": size,
