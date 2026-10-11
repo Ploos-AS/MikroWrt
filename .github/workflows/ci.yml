@@ -1,0 +1,13 @@
+name: MikroWrt checks
+on:
+  push:
+  pull_request:
+jobs:
+  tooling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python tooling
+        run: python3 -m unittest discover -s tests -v
+      - name: Check shell syntax
+        run: sh -n scripts/bootstrap-openwrt.sh
