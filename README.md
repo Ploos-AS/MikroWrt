@@ -2,13 +2,18 @@
 
 **Tiny Linux. Old Hardware. New Possibilities.**
 
-MikroWrt is an experimental, OpenWrt-derived Linux firmware project for resource-constrained routers that contemporary distributions no longer prioritize. It complements OpenWrt; it does not aim to replace it.
+MikroWrt is an independent, experimental, OpenWrt-derived Linux firmware project for resource-constrained routers that contemporary distributions no longer prioritize. It complements OpenWrt; it does not aim to replace it.
+
+## Dependency direction
+
+**PocketBox depends on MikroWrt. MikroWrt does not depend on PocketBox.**
+
+MikroWrt is a complete standalone router firmware platform with its own build, tests, releases and hardware support. It must build, boot and work without PocketBox source code, packages, or configuration. PocketBox is developed and released in its own repository as a downstream application. PocketBox-specific packaging and integration belong in PocketBox (or a separate integration repository), not MikroWrt core.
 
 ## Goals
 
 - Restore useful functionality to older routers.
 - Target 4 MB flash / 32 MB RAM initially; investigate 4 MB / 16 MB as an ambitious stretch target.
-- Keep PocketBox as a separate application built on top of MikroWrt, not as a fork of PirateBox or LibraryBox.
 - Produce reproducible, device-specific firmware images, measured against real flash and RAM budgets.
 - Document installation and recovery before hardware flashing.
 
