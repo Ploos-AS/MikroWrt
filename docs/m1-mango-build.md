@@ -1,14 +1,14 @@
-# M1.3 — Mango minimal profile and image inventory
+# M1.5 — Mango candidate build
 
-This is an **unqualified candidate** OpenWrt-derived Mango build recipe. No hardware validation or firmware release is implied.
+No hardware-tested firmware or release is available yet.
 
-## Candidate target
+## Verified upstream source
 
-- SoC family: MediaTek MT76x8 / ramips
-- Candidate device config: `CONFIG_TARGET_ramips_mt76x8_DEVICE_glinet_gl-mt300n-v2=y`
-- Verify device definition in the chosen upstream checkout.
+OpenWrt v24.10.4 resolves to commit `78b23a26c4c98938d549e7ff5876508544e33d4` (checked using GitHub commit API). The tag's `target/linux/ramips/image/mt76x8.mk` includes `Device/glinet_gl-mt300n-v2` and `TARGET_DEVICES += glinet_gl-mt300n-v2`.
 
-## Build a baseline candidate
+Candidate device config: `CONFIG_TARGET_ramips_mt76x8_DEVICE_glinet_gl-mt300n-v2=y`. Final Kconfig resolution and build remain unverified.
+
+## Build on a supported Linux host
 
 ```sh
 sh scripts/bootstrap-openwrt.sh
@@ -16,32 +16,29 @@ sh scripts/select-mango.sh
 cd upstream/openwrt
 make defconfig
 cd ../..
-sh scripts/build-firmware.sh
+MIKROWRT_REQUIRE_SSH=1 sh scripts/build-firmware.sh
 ```
 
-## Prepare a conservative minimal profile
+The wrapper runs `make defconfig`, checks recognized management packages, downloads dependencies, compiles firmware and writes reports if successful. If static usability preflight fails, inspect the resolved config and fix the selected packages. No automated flashing.
 
-Start with a fresh, configured OpenWrt tree. The script **writes a separate file** and never edits the original configuration in place.
+## Feature choices
+
+**Default: preserve upstream packages.** The optional configuration helper no longer removes LuCI, PPP or package management implicitly.
 
 ```sh
-python3 scripts/apply-minimal-profile.py upstream/openwrt/.config --output build-output/mango-minimal.config
-cp build-output/mango-minimal.config upstream/openwrt/.config
-cd upstream/openwrt
-make defconfig
-cd ../..
-sh scripts/build-firmware.sh
+python3 scripts/apply-minimal-profile.py upstream/openwrt/.config \
+  --output build-output/mango-custom.config --disable ppp --enable ssh
+cp build-output/mango-custom.config upstream/openwrt/.config
 ```
 
-The overlay disables a small explicit list of optional packages (LuCI, PPP and opkg). Some upstream package selections may be restored by dependency resolution; inspect the resolved `.config` and image manifest. This is a **first pass**, not an optimized Nano image. Do not remove DHCP, Wi-Fi drivers, or essential network tooling without target-specific tests.
+Then run `make defconfig`, inspect the resolved config, and build. The `--package-manager` option accepts `keep` (default), `opkg`, `apk` and `none`; availability depends on the selected upstream release.
 
-## Firmware inventory
+## Required validation
 
-```sh
-python3 scripts/report-images.py upstream/openwrt/bin/targets --output build-output/images.json
-```
+- Confirm device-specific flash partition limits and factory/sysupgrade image formats.
+- Confirm actual management access, Wi-Fi AP, Ethernet, DHCP/DNS, boot RAM and free flash.
+- Record serial boot logs and verified recovery procedure.
+- Compare unmodified OpenWrt and custom MikroWrt build outputs.
+- Treat all generated images as **UNTESTED — DO NOT FLASH** until qualification.
 
-Only specify `--budget-bytes N` after confirming the exact writable firmware partition size for the target. The report records image paths, bytes and SHA-256 digests. Its budget result does **not** prove the image is flash-safe.
-
-## Safety
-
-No flashing is performed. Factory and sysupgrade images are not interchangeable. Verify board revision, image metadata, partition map, recovery method and checksums before attempting installation. Record RAM and boot measurements on physical hardware. PocketBox is outside MikroWrt scope.
+PocketBox remains a separate downstream project.
