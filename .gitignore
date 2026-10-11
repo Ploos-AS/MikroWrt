@@ -1,0 +1,8 @@
+build-output/
+downloads/
+staging_dir/
+tmp/
+*.bin
+*.img
+*.trx
+*.itb
