@@ -1,4 +1,5 @@
 build-output/
+upstream/
 downloads/
 staging_dir/
 tmp/
