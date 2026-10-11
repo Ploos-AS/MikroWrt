@@ -14,9 +14,13 @@ OpenWrt upstream
 
 MikroWrt owns firmware/build system, board support, basic networking, recovery, resource budgets, standalone firmware releases and tests. It must remain functional without PocketBox.
 
-PocketBox owns offline HTTP, Telnet/BBS, its application packages, configuration and optional firmware integration. PocketBox depends on MikroWrt, never the reverse. Do not put PocketBox-specific appliances, build profiles, CI dependencies or source imports into MikroWrt core. Generic extension points are acceptable if they are useful independently of PocketBox.
+PocketBox owns offline HTTP, Telnet/BBS, its application packages, configuration and optional firmware integration. PocketBox depends on MikroWrt, never the reverse.
 
-Historical PirateBox/LibraryBox are reference-only: consult straightforward WR703N installation procedures where useful, but do not port, maintain, or depend on their implementations.
+## Functionality first
+
+MikroWrt is not a stripped-down demo. Retain essential network functions and expose optional features through build-time profiles. Package management must be selectable, **not unconditionally removed**. Default to the package manager of the pinned upstream OpenWrt baseline (opkg on older releases, apk on newer releases); never assume a manager exists without checking the selected baseline. Nano builds may omit a package manager to meet strict flash budgets, but must still provide a useful, documented set of built-in services. USB/extroot is optional where supported.
+
+Historical PirateBox/LibraryBox are reference-only; do not import or maintain their implementations.
 
 ## Build strategy
 
