@@ -30,6 +30,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("directory", type=Path)
     p.add_argument("--budget-bytes", type=int)
+    p.add_argument("--require-images", action="store_true", help="Fail if no firmware images were found")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     if not args.directory.is_dir():
@@ -40,6 +41,8 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(data, indent=2) + "\n")
     print(f"Recorded {len(data['images'])} candidate images in {args.output}")
+    if args.require_images and not data["images"]:
+        p.exit(1, "No firmware images found; refusing to mark build successful.\n")
 
 if __name__ == "__main__":
     main()
