@@ -50,3 +50,17 @@ Open **Actions → Mango firmware candidate (manual) → Run workflow** on the m
 The workflow installs build dependencies on Ubuntu 24.04, checks out the pinned upstream revision, installs OpenWrt feeds, selects the Mango device and runs the guarded build wrapper. Candidate outputs and diagnostic reports are uploaded as the `mango-candidate-unqualified` artifact when available. The workflow has not yet been confirmed to compile successfully.
 
 **Do not flash CI artifacts.** A successful workflow run is evidence of compilation only, not device safety, runtime administration, correct partition sizes, or recovery.
+
+## Package manifest (M1.7)
+
+A successful build now writes `build-output/packages.json` with the selected OpenWrt packages from the **resolved** `.config`. It is included in the manual GitHub Actions artifact.
+
+To compare a candidate against a saved stock configuration:
+
+```sh
+python3 scripts/report-packages.py upstream/openwrt/.config \
+  --baseline build-output/stock-openwrt.config \
+  --output build-output/package-diff.json
+```
+
+The manifest compares package selections only. It does not prove packages were included in a specific final image, that runtime installation works, or that a firmware build succeeded. Use device-specific image manifests and hardware tests to confirm those properties.
