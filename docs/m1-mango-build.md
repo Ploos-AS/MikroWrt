@@ -42,3 +42,11 @@ Then run `make defconfig`, inspect the resolved config, and build. The `--packag
 - Treat all generated images as **UNTESTED — DO NOT FLASH** until qualification.
 
 PocketBox remains a separate downstream project.
+
+## GitHub Actions candidate build (M1.6)
+
+Open **Actions → Mango firmware candidate (manual) → Run workflow** on the main branch. This is intentionally not triggered by every push.
+
+The workflow installs build dependencies on Ubuntu 24.04, checks out the pinned upstream revision, installs OpenWrt feeds, selects the Mango device and runs the guarded build wrapper. Candidate outputs and diagnostic reports are uploaded as the `mango-candidate-unqualified` artifact when available. The workflow has not yet been confirmed to compile successfully.
+
+**Do not flash CI artifacts.** A successful workflow run is evidence of compilation only, not device safety, runtime administration, correct partition sizes, or recovery.
