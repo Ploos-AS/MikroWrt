@@ -7,14 +7,16 @@ MikroWrt is independent firmware. PocketBox depends on MikroWrt and maintains it
 - [x] Record scope, non-goals and architecture.
 - [x] Add upstream bootstrap tooling and guarded firmware build entrypoint.
 - [x] Add image-size checker, tests and CI for tooling.
+- [x] Add candidate minimal package overlay and image inventory scripts.
 - [ ] Select and pin supported OpenWrt baseline(s) to full commits.
-- [ ] Add image-size and build-metadata reporting to firmware CI.
+- [ ] Run firmware CI builds and verify artifacts.
 - [ ] Record known-safe flashing/recovery paths per hardware revision.
 
 ## M1 — Mango reference
 
 - [x] Document hardware acceptance criteria.
-- [ ] Select and verify actual Mango OpenWrt target/profile.
+- [x] Add candidate Mango target selection and minimal package overlay.
+- [ ] Verify Mango profile and resolved package selections against upstream.
 - [ ] Minimal bootable image for GL-MT300N-V2.
 - [ ] Serial boot log, network test, RAM and flash measurements.
 - [ ] Repeatable builds and recovery test.
