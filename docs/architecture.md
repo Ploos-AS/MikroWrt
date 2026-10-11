@@ -1,14 +1,26 @@
 # Architecture and boundaries
 
-MikroWrt = firmware/build system, board support, basic networking, recovery, resource budgets.
+## Strict one-way dependency
 
-PocketBox = separate project/application offering offline HTTP and Telnet/BBS experiences. PocketBox may be included during image composition or installed on compatible systems; no dependency on PirateBox or LibraryBox source trees.
+```text
+OpenWrt upstream
+      |
+      v
+  MikroWrt        (independent firmware; no PocketBox dependency)
+      |
+      v
+  PocketBox       (separate downstream application/repository)
+```
 
-Historical PirateBox/LibraryBox are reference-only: consult their straightforward WR703N installation procedures where useful, but do not port, maintain, or depend on their implementations.
+MikroWrt owns firmware/build system, board support, basic networking, recovery, resource budgets, standalone firmware releases and tests. It must remain functional without PocketBox.
+
+PocketBox owns offline HTTP, Telnet/BBS, its application packages, configuration and optional firmware integration. PocketBox depends on MikroWrt, never the reverse. Do not put PocketBox-specific appliances, build profiles, CI dependencies or source imports into MikroWrt core. Generic extension points are acceptable if they are useful independently of PocketBox.
+
+Historical PirateBox/LibraryBox are reference-only: consult straightforward WR703N installation procedures where useful, but do not port, maintain, or depend on their implementations.
 
 ## Build strategy
 
-Start from reproducibly pinned OpenWrt sources and board definitions; keep downstream changes minimal and auditable. Target-specific kernel/driver selection must be recorded. Appliance profiles are build-time selections, not a promise of a runtime package manager.
+Start from reproducibly pinned OpenWrt sources and board definitions; keep downstream changes minimal and auditable. Target-specific kernel/driver selection must be recorded. MikroWrt firmware must build and boot standalone.
 
 ## Target tiers
 
