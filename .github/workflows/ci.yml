@@ -10,4 +10,4 @@ jobs:
       - name: Check Python tooling
         run: python3 -m unittest discover -s tests -v
       - name: Check shell syntax
-        run: sh -n scripts/bootstrap-openwrt.sh
+        run: sh -n scripts/bootstrap-openwrt.sh scripts/select-mango.sh scripts/build-firmware.sh
