@@ -36,6 +36,11 @@ jobs:
           BUILD_JOBS: "2"
           MIKROWRT_REQUIRE_SSH: "1"
         run: sh scripts/build-firmware.sh
+      - name: Require Mango-specific firmware image
+        run: |
+          python3 scripts/report-images.py upstream/openwrt/bin/targets \
+            --require-images --require-name gl-mt300n-v2 \
+            --output build-output/mango-images.json
       - name: Upload reports and candidate images
         if: always()
         uses: actions/upload-artifact@v4
