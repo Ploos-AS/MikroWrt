@@ -11,6 +11,10 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Validate MikroWrt tooling first
+        run: |
+          python3 -m unittest discover -s tests -v
+          sh -n scripts/bootstrap-openwrt.sh scripts/select-mango.sh scripts/build-firmware.sh
       - name: Install OpenWrt build dependencies
         run: |
           sudo apt-get update
