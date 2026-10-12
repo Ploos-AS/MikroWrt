@@ -1,6 +1,8 @@
 import unittest
 import importlib.util
 import tempfile
+import subprocess
+import sys
 from pathlib import Path
 path = Path(__file__).resolve().parents[1] / "scripts" / "report-images.py"
 spec = importlib.util.spec_from_file_location("report_images", path)
@@ -37,3 +39,29 @@ class ReportImagesTests(unittest.TestCase):
                 module.report(root, None)["images"][0]["sha256"],
                 "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
             )
+
+    def test_require_name_rejects_wrong_device(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "other-router-sysupgrade.bin").write_bytes(b"test")
+            output = root / "report.json"
+            result = subprocess.run(
+                [sys.executable, str(path), str(root),
+                 "--require-images", "--require-name", "gl-mt300n-v2",
+                 "--output", str(output)],
+                capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("No firmware image filename matches", result.stderr)
+
+    def test_require_name_accepts_mango(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "openwrt-glinet_gl-mt300n-v2-sysupgrade.bin").write_bytes(b"test")
+            result = subprocess.run(
+                [sys.executable, str(path), str(root),
+                 "--require-images", "--require-name", "gl-mt300n-v2",
+                 "--output", str(root / "report.json")],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
