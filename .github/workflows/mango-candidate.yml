@@ -1,6 +1,14 @@
-name: Mango firmware candidate (manual)
+name: Mango firmware candidate
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/mango-candidate.yml'
+      - '.github/workflows/ci.yml'
+      - '!**/*.md'
 
 permissions:
   contents: read
