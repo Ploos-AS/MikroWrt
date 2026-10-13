@@ -36,6 +36,7 @@ def main():
     p.add_argument("--reserve-bytes", type=int, default=0)
     p.add_argument("--require-images", action="store_true", help="Fail if no firmware images were found")
     p.add_argument("--require-name", help="Require at least one image filename containing this text")
+    p.add_argument("--require-kind", choices=("factory", "sysupgrade"), help="Require matching filename-indicated image kind")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     if not args.directory.is_dir():
@@ -58,8 +59,11 @@ def main():
     print(f"Recorded {len(data['images'])} candidate images in {args.output}")
     if args.require_images and not data["images"]:
         p.exit(1, "No firmware images found; refusing to mark build successful.\n")
-    if args.require_name and not any(args.require_name in Path(item["path"]).name for item in data["images"]):
-        p.exit(1, f"No firmware image filename matches {args.require_name!r}.\n")
+    matching = [item for item in data["images"]
+                if (not args.require_name or args.require_name in Path(item["path"]).name)
+                and (not args.require_kind or item["image_kind"] == args.require_kind)]
+    if (args.require_name or args.require_kind) and not matching:
+        p.exit(1, "No firmware image matches required device name and image kind.\n")
 
 if __name__ == "__main__":
     main()
