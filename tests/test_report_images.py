@@ -40,6 +40,39 @@ class ReportImagesTests(unittest.TestCase):
                 "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
             )
 
+    def test_image_kind_classification(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name in ("router-factory.bin", "router-sysupgrade.bin", "router-kernel.bin"):
+                (root / name).write_bytes(b"x")
+            kinds = {x["path"]: x["image_kind"] for x in module.report(root, None)["images"]}
+            self.assertEqual(kinds["router-factory.bin"], "factory")
+            self.assertEqual(kinds["router-sysupgrade.bin"], "sysupgrade")
+            self.assertEqual(kinds["router-kernel.bin"], "unknown")
+
+    def test_reserve_manifest(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "router.bin").write_bytes(b"abc")
+            output = root / "report.json"
+            cmd = [sys.executable, str(path), str(root), "--output", str(output),
+                   "--budget-bytes", "4", "--reserve-bytes", "2"]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(output.read_text())
+            self.assertFalse(report["images"][0]["meets_reserve"])
+            self.assertEqual(report["required_reserve_bytes"], 2)
+
+    def test_reserve_without_budget_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "router.bin").write_bytes(b"abc")
+            result = subprocess.run([sys.executable, str(path), str(root),
+                                     "--reserve-bytes", "1", "--output", str(root / "report.json")],
+                                    capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+
     def test_require_name_rejects_wrong_device(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
