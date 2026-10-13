@@ -85,7 +85,21 @@ class ReportImagesTests(unittest.TestCase):
                 capture_output=True, text=True,
             )
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("No firmware image filename matches", result.stderr)
+            self.assertIn("No firmware image matches", result.stderr)
+
+    def test_require_name_and_kind_must_match_same_image(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "gl-mt300n-v2-factory.bin").write_bytes(b"a")
+            (root / "other-router-sysupgrade.bin").write_bytes(b"b")
+            cmd = [sys.executable, str(path), str(root), "--require-name",
+                   "gl-mt300n-v2", "--require-kind", "sysupgrade",
+                   "--output", str(root / "report.json")]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            (root / "gl-mt300n-v2-sysupgrade.bin").write_bytes(b"c")
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_require_name_accepts_mango(self):
         with tempfile.TemporaryDirectory() as tmp:
