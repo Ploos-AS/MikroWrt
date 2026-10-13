@@ -1,4 +1,9 @@
 name: Mango firmware candidate
+
+concurrency:
+  group: mango-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
@@ -60,7 +65,7 @@ jobs:
       - name: Require Mango-specific firmware image
         run: |
           python3 scripts/report-images.py upstream/openwrt/bin/targets \
-            --require-images --require-name gl-mt300n-v2 \
+            --require-images --require-name gl-mt300n-v2 --require-kind sysupgrade \
             --output build-output/mango-images.json
       - name: Record candidate source revision and runner disk use
         if: always()
