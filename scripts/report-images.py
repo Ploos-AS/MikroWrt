@@ -16,7 +16,10 @@ def report(folder: Path, limit: int | None):
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                 digest_obj.update(chunk)
         digest = digest_obj.hexdigest()
+        image_kind = ("sysupgrade" if "sysupgrade" in path.name else
+                      "factory" if "factory" in path.name else "unknown")
         records.append({
+            "image_kind": image_kind,
             "path": str(path.relative_to(folder)),
             "bytes": size,
             "sha256": digest,
@@ -30,6 +33,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("directory", type=Path)
     p.add_argument("--budget-bytes", type=int)
+    p.add_argument("--reserve-bytes", type=int, default=0)
     p.add_argument("--require-images", action="store_true", help="Fail if no firmware images were found")
     p.add_argument("--require-name", help="Require at least one image filename containing this text")
     p.add_argument("--output", type=Path, required=True)
@@ -38,7 +42,17 @@ def main():
         p.error("Image directory does not exist")
     if args.budget_bytes is not None and args.budget_bytes <= 0:
         p.error("Budget must be positive")
+    if args.reserve_bytes < 0:
+        p.error("Reserve must be nonnegative")
+    if args.reserve_bytes and args.budget_bytes is None:
+        p.error("--reserve-bytes requires --budget-bytes")
+    if args.budget_bytes is not None and args.reserve_bytes >= args.budget_bytes:
+        p.error("Reserve must be smaller than budget")
     data = report(args.directory, args.budget_bytes)
+    data["required_reserve_bytes"] = args.reserve_bytes
+    for item in data["images"]:
+        item["meets_reserve"] = (item["budget_margin_bytes"] >= args.reserve_bytes
+                                 if args.budget_bytes is not None else None)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(data, indent=2) + "\n")
     print(f"Recorded {len(data['images'])} candidate images in {args.output}")
